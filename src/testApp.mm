@@ -7,7 +7,7 @@ void testApp::setup(){
 	ofRegisterTouchEvents(this);
 	//If you want a landscape oreintation
 	//iPhoneSetOrientation(OFXIPHONE_ORIENTATION_LANDSCAPE_RIGHT);
-	
+	ofEnableSmoothing();
 	ofBackground(0);
     // open an outgoing connection to HOST:PORT
     
@@ -55,6 +55,7 @@ void testApp::draw(){
 		
 		ofNoFill();
 		ofSetHexColor( 0x00A6FF );
+//        ofSphere(0, 0, 0, 6);
 		ofBox( 0, 0, 12 );
 	}
 	ofPopMatrix();
