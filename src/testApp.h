@@ -4,10 +4,14 @@
 #include "ofxiPhone.h"
 #include "ofxiPhoneExtras.h"
 #include "ofxOsc.h"
-
+#include "ofxUI.h"
 #define HOST "10.0.1.9"
 #define PORT 7170
 #import <CoreMotion/CMMotionManager.h>
+#define NUM_STRIP 1000
+#define LOC_LENGTH 10
+#define LENGTH LOC_LENGTH*2
+#define NUM_TOUCH 10
 class testApp : public ofxiPhoneApp{
 	
 public:
@@ -41,6 +45,32 @@ public:
 	float roll, pitch, yaw;
 	
 	ofCamera camera;
+
+    void fireStrip(float x, float y,float px, float py);
+
+    ofxUICanvas *gui1;
+    ofxUICanvas *gui2;
+    ofxUICanvas *gui3;
+    ofxUICanvas *gui4;
+    
+    
+    
+    ofVbo vbo;
+    ofVec3f pos[NUM_STRIP];
+    ofVec3f acc[NUM_STRIP];
+    ofVec3f vec[NUM_STRIP];
+    float age[NUM_STRIP];
+    ofVec3f strip[NUM_STRIP*LENGTH];
+    ofVec3f loc[NUM_STRIP*LOC_LENGTH];
+	ofFloatColor color[NUM_STRIP*LENGTH];
+    int total;
+    int count;
+    ofVec3f point[NUM_TOUCH];
+    bool canFire[NUM_TOUCH];
+    ofVec3f pMouse[NUM_TOUCH];
+    
+
+
 };
 
 
