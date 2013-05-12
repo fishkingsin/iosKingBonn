@@ -2,11 +2,49 @@
 #include "Settings.h"
 //--------------------------------------------------------------
 void testApp::setup(){
-	// initialize the accelerometer
-	ofxAccelerometer.setup();
+    // initialize the accelerometer
+	
+    float latitudeBands = 60;
+    float longitudeBands = 60;
+    float radius = 12;
+    
+    for (int latNumber = 0; latNumber <= latitudeBands; latNumber++) {
+        float theta = latNumber * PI / latitudeBands;
+        float sinTheta = sin(theta);
+        float cosTheta = cos(theta);
+        for (int longNumber = 0; longNumber <= longitudeBands; longNumber++) {
+            float phi = longNumber * 2 * PI / longitudeBands;
+            float sinPhi = sin(phi);
+            float cosPhi = cos(phi);
+            float x = cosPhi * sinTheta;
+            float y = cosTheta;
+            float z = sinPhi * sinTheta;
+            float u = 1- (longNumber / longitudeBands);
+            float v = latNumber / latitudeBands;
+            sphereMesh.addVertex(ofVec3f(x,y,z)*radius);
+            sphereMesh.addNormal(ofVec3f(x,y,z));
+            sphereMesh.addTexCoord(ofVec2f(u,v));
+
+            sphereMesh.addColor(ofFloatColor(0.2,0.2,1,0.1));
+        }
+    }
+    for (int latNumber = 0; latNumber < latitudeBands; latNumber++) {
+        for (int longNumber = 0; longNumber < longitudeBands; longNumber++) {
+            int first = (latNumber * (longitudeBands + 1)) + longNumber;
+            int second = first + longitudeBands + 1;
+            sphereMesh.addIndex(first);
+            sphereMesh.addIndex(second);
+            sphereMesh.addIndex(first + 1);
+            sphereMesh.addIndex(second);
+            sphereMesh.addIndex(second + 1);
+            sphereMesh.addIndex(first + 1);
+        }
+    }
+
+    ofxAccelerometer.setup();
 	ofRegisterTouchEvents(this);
 	//If you want a landscape oreintation
-	//iPhoneSetOrientation(OFXIPHONE_ORIENTATION_LANDSCAPE_RIGHT);
+    //    iPhoneSetOrientation(OFXIPHONE_ORIENTATION_LANDSCAPE_RIGHT);
     ofEnableAlphaBlending();
 	ofEnableSmoothing();
 	ofBackground(0);
@@ -15,9 +53,12 @@ void testApp::setup(){
     // Get an integer and a string value
     string host = Settings::getString("Host");
     int port = Settings::getInt("Port");
+    int inport = Settings::getInt("Incoming Port");
+    
     
     
 	sender.setup( host, port );
+    receiver.setup( inport );
     // Initialize gyro
 	enableGyro();
 	
@@ -31,12 +72,12 @@ void testApp::setup(){
         vec[j].set(0,0,0);
         acc[j].set(ofRandom(-1,1),ofRandom(-1,1),0);
         age[j] = 1;
-        float h = ofRandom(100,200);
+        float h = ofRandom(100,150);
         for (int i=0; i<LENGTH; i++)
         {
             int index = i+(j*LENGTH);
             strip[index].set(ofGetWidth()*0.5,ofGetHeight()*0.5,0);
-            float brightness = sinf(PI*float((i*0.5)*1.f/LENGTH*0.5f))*255;
+            float brightness = sinf(PI*float((i*0.5)*1.f/LENGTH*0.5f))*125;
             color[index].set(ofColor::fromHsb(h,255, 255,brightness));
         }
         
@@ -58,10 +99,68 @@ void testApp::setup(){
         canFire[i] = false;
         point[i].set(0,0);
     }
+    
+    setGUI1();
+	setGUI2();
+//    setGUI3();
+//    setGUI4();
+//    
+    gui1->setDrawPadding(true);
+    gui2->setDrawPadding(true);
+//    gui3->setDrawPadding(true);
+//    gui4->setDrawPadding(true);
+    
+    gui1->setDrawBack(false);
+    gui2->setDrawBack(false);
+//    gui3->setDrawBack(false);
+//    gui4->setDrawBack(false);
+    gui1->setVisible(true);
+    gui2->setVisible(false);
+//    gui3->setVisible(true);
+//    gui4->setVisible(true);
 }
 
 //--------------------------------------------------------------
 void testApp::update(){
+    // check for waiting messages
+    while(receiver.hasWaitingMessages()){
+        // get the next message
+        ofxOscMessage m;
+        receiver.getNextMessage(&m);
+        
+        // check for mouse moved message
+        if(m.getAddress() == "/mode"){
+            int _mode = m.getArgAsInt32(0);
+            switch(_mode)
+            {
+                case 0:
+//                    mode = POINT;
+                    gui1->setVisible(true);
+                    gui2->setVisible(false);
+                    break;
+                case 1:
+//                    mode = DISPLACEMENT;
+                    gui1->setVisible(true);
+                    gui2->setVisible(false);
+                    break;
+                case 2:
+//                    mode = SLITSCAN;
+                    gui1->setVisible(false);
+                    gui2->setVisible(true);
+                    break;
+                case 3:
+                    gui1->setVisible(true);
+                    gui2->setVisible(false);
+//                    mode = TRIANGLE;
+                    break;
+                default:
+//                    mode = POINT;
+                    break;
+                    
+            }
+
+        }
+    }
     //    if( ofGetFrameNum() % 120 == 0 ){
     ofxOscMessage m;
     m.setAddress( "/orbit" );
@@ -157,12 +256,16 @@ void testApp::draw(){
 		ofRotateY( -ofRadToDeg( roll ) );
 		ofRotateZ( -ofRadToDeg( yaw ) );
 		
-		ofDrawAxis( 4 );
+//		ofDrawAxis( 4 );
 		
 		ofNoFill();
 		ofSetHexColor( 0x00A6FF );
-
-		ofBox( 0, 0, 12 );
+        glPointSize(3);
+//        sphereMesh.draw();
+        sphereMesh.drawWireframe();
+        sphereMesh.drawVertices();
+//        ofSphere(0, 0, 0, 12);
+//		ofBox( 0, 0, 12 );
 	}
 	ofPopMatrix();
     
@@ -189,7 +292,10 @@ void testApp::draw(){
 
 //--------------------------------------------------------------
 void testApp::exit(){
-    
+    delete gui1;
+	delete gui2;
+//    delete gui3;
+//    delete gui4;
 }
 
 //--------------------------------------------------------------
@@ -318,3 +424,122 @@ void testApp::getDeviceGLRotationMatrix() {
 	rotMatrix[12] = 0;rotMatrix[13] = 0;rotMatrix[14] = 0; rotMatrix[15] = 1;
 	
 }
+
+void testApp::guiEvent(ofxUIEventArgs &e)
+{
+	string name = e.widget->getName();
+	int kind = e.widget->getKind();
+	cout << "got event from: " << name << endl;
+//    if(kind == OFX_UI_WIDGET_TOGGLE)
+    {
+        ofxOscBundle bundle;
+        if(name =="POINT")
+        {
+            ofxOscMessage msg;
+            
+            msg.setAddress("/mode");
+            msg.addIntArg(0);
+            bundle.addMessage(msg);
+                        gui2->setVisible(false);
+            
+        }else if(name =="DISPLACEMENT")
+        {
+            ofxOscMessage msg;
+            msg.setAddress("/mode");
+            msg.addIntArg(1);
+            bundle.addMessage(msg);
+            gui2->setVisible(false);            
+        }else if(name == "TRIANGLE")
+        {
+            gui2->setVisible(false);
+            ofxOscMessage msg;
+            msg.setAddress("/mode");
+            msg.addIntArg(3);
+            bundle.addMessage(msg);
+        }else if(name == "SLITSCAN")
+        {
+            gui2->setVisible(true);
+            ofxOscMessage msg;
+            msg.setAddress("/mode");
+            msg.addIntArg(2);
+            bundle.addMessage(msg);
+        }
+        else
+        {
+            ofxOscMessage msg;
+            msg.setAddress("/slitscan");
+            msg.addStringArg(name);
+            bundle.addMessage(msg);
+//            "0: most recent");
+//            gradientModeRadioOption.push_back("1: left-right");
+//            gradientModeRadioOption.push_back("2: right-left");
+//            gradientModeRadioOption.push_back("3: top-bottom");
+//            gradientModeRadioOption.push_back("4: bottom-top"
+        }
+        sender.sendBundle(bundle);
+    }
+
+}
+void testApp::setGUI1()
+{
+    float dim = 16;
+	float xInit = OFX_UI_GLOBAL_WIDGET_SPACING;
+    float length = ofGetWidth();
+    float height = ofGetHeight()/4.0f;
+
+	gui1 = new ofxUICanvas(0, ofGetHeight()-height, length+xInit, height);
+gui1->addLabel("PANEL1");
+    gui1->addLabelButton("DISPLACEMENT", false, length-xInit);
+    gui1->addLabelButton("POINT", false, length-xInit);
+    gui1->addLabelButton("TRIANGLE", false, length-xInit);
+//    gui1->addLabelButton("SLITSCAN", false, length-xInit);
+    ofAddListener(gui1->newGUIEvent,this,&testApp::guiEvent);
+}
+void testApp::setGUI2()
+{
+    float dim = 16;
+	float xInit = OFX_UI_GLOBAL_WIDGET_SPACING;
+    float length = ofGetWidth();
+    float height = ofGetHeight()/4.0f;
+    
+	gui2 = new ofxUICanvas(0, ofGetHeight()-height, length+xInit, height);
+    gui2->addLabel("PANEL2");
+    vector<string>gradientModeRadioOption;
+    gradientModeRadioOption.push_back("0: most recent");
+    gradientModeRadioOption.push_back("1: left-right");
+    gradientModeRadioOption.push_back("2: right-left");
+    gradientModeRadioOption.push_back("3: top-bottom");
+    gradientModeRadioOption.push_back("4: bottom-top");
+    gui2->addLabelButton(gradientModeRadioOption[0], false, length-xInit);
+    gui2->addLabelButton(gradientModeRadioOption[1], false, length-xInit);
+    gui2->addLabelButton(gradientModeRadioOption[2], false, length-xInit);
+    gui2->addLabelButton(gradientModeRadioOption[3], false, length-xInit);
+    gui2->addLabelButton(gradientModeRadioOption[4], false, length-xInit);
+
+    ofAddListener(gui2->newGUIEvent,this,&testApp::guiEvent);
+    
+}
+//void testApp::setGUI3()
+//{
+//    float dim = 16;
+//	float xInit = OFX_UI_GLOBAL_WIDGET_SPACING;
+//    float length = ofGetWidth()/4.0f;
+//    float height = ofGetHeight()/4.0f;
+//    
+//	gui3 = new ofxUICanvas(length*2+xInit, ofGetHeight()-height, length+xInit, height);
+//    gui3->addLabel("PANEL3");
+//    ofAddListener(gui3->newGUIEvent,this,&testApp::guiEvent);
+//
+//}
+//void testApp::setGUI4()
+//{
+//    float dim = 16;
+//	float xInit = OFX_UI_GLOBAL_WIDGET_SPACING;
+//    float length = ofGetWidth()/4.0f;
+//    float height = ofGetHeight()/4.0f;
+//    
+//	gui4 = new ofxUICanvas(length*3+xInit, ofGetHeight()-height, length+xInit, height);
+//    gui4->addLabel("PANEL4");
+//    ofAddListener(gui4->newGUIEvent,this,&testApp::guiEvent);
+//
+//}
