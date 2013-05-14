@@ -3,7 +3,7 @@
 //--------------------------------------------------------------
 void testApp::setup(){
     // initialize the accelerometer
-	
+	ofSetLogLevel(OF_LOG_VERBOSE);
     float latitudeBands = 60;
     float longitudeBands = 60;
     float radius = 12;
@@ -24,7 +24,7 @@ void testApp::setup(){
             sphereMesh.addVertex(ofVec3f(x,y,z)*radius);
             sphereMesh.addNormal(ofVec3f(x,y,z));
             sphereMesh.addTexCoord(ofVec2f(u,v));
-
+            
             sphereMesh.addColor(ofFloatColor(0.2,0.2,1,0.1));
         }
     }
@@ -40,7 +40,7 @@ void testApp::setup(){
             sphereMesh.addIndex(first + 1);
         }
     }
-
+    
     ofxAccelerometer.setup();
 	ofRegisterTouchEvents(this);
 	//If you want a landscape oreintation
@@ -102,22 +102,22 @@ void testApp::setup(){
     
     setGUI1();
 	setGUI2();
-//    setGUI3();
-//    setGUI4();
-//    
+    //    setGUI3();
+    //    setGUI4();
+    //
     gui1->setDrawPadding(true);
     gui2->setDrawPadding(true);
-//    gui3->setDrawPadding(true);
-//    gui4->setDrawPadding(true);
+    //    gui3->setDrawPadding(true);
+    //    gui4->setDrawPadding(true);
     
-    gui1->setDrawBack(false);
-    gui2->setDrawBack(false);
-//    gui3->setDrawBack(false);
-//    gui4->setDrawBack(false);
+    gui1->setDrawBack(true);
+    gui2->setDrawBack(true);
+    //    gui3->setDrawBack(false);
+    //    gui4->setDrawBack(false);
     gui1->setVisible(true);
     gui2->setVisible(false);
-//    gui3->setVisible(true);
-//    gui4->setVisible(true);
+    //    gui3->setVisible(true);
+    //    gui4->setVisible(true);
 }
 
 //--------------------------------------------------------------
@@ -131,34 +131,36 @@ void testApp::update(){
         // check for mouse moved message
         if(m.getAddress() == "/mode"){
             int _mode = m.getArgAsInt32(0);
-            switch(_mode)
+            switch(_mode)   
             {
                 case 0:
-//                    mode = POINT;
+                    //                    mode = POINT;
                     gui1->setVisible(true);
                     gui2->setVisible(false);
                     break;
                 case 1:
-//                    mode = DISPLACEMENT;
-                    gui1->setVisible(true);
-                    gui2->setVisible(false);
-                    break;
-                case 2:
-//                    mode = SLITSCAN;
+                    //                    mode = SLITSCAN;
                     gui1->setVisible(false);
                     gui2->setVisible(true);
                     break;
-                case 3:
+                case 2:
+                    
                     gui1->setVisible(true);
                     gui2->setVisible(false);
-//                    mode = TRIANGLE;
+                    //                    mode = TRIANGLE;
+                    
+                    break;
+                case 3:
+                    //                    mode = DISPLACEMENT;
+                    gui1->setVisible(true);
+                    gui2->setVisible(false);
                     break;
                 default:
-//                    mode = POINT;
+                    //                    mode = POINT;
                     break;
                     
             }
-
+            
         }
     }
     //    if( ofGetFrameNum() % 120 == 0 ){
@@ -176,58 +178,58 @@ void testApp::update(){
     for (int j=0; j<NUM_STRIP; j++)
     {
         if(age[j]>0)
-         {
-             ofVec3f _vec(ofSignedNoise(t, pos[j].y/div, pos[j].z/div),
-                          ofSignedNoise(pos[j].x/div, t, pos[j].z/div),
-                          0);
-             _vec *=  ofGetLastFrameTime()*50;
-             vec[j]+=_vec;
-             vec[j]+=acc[j];
-             vec[j]*=0.9;
-             ofVec3f Off;
-             float radius = 10;
-             for (int i=LOC_LENGTH-1; i>=1; i--)
-             {
-                 int index = i+(j*LOC_LENGTH);
-                 loc[index].set(loc[index-1]);
-             }
-             for (int i=0; i<LOC_LENGTH; i++)
-             {
-                 int index = i+(j*LOC_LENGTH);
-                 int index2 = (i*2)+(j*LENGTH);
-                 
-                 
-                 radius = sinf(PI*float(i*1.f/LOC_LENGTH))*15;
-                 {
-                     ofVec3f perp0 = loc[index] - loc[index+1];
-                     ofVec3f perp1 = perp0.getCrossed( ofVec3f( 0, 1, 0 ) ).getNormalized();
-                     ofVec3f perp2 = perp0.getCrossed( perp1 ).getNormalized();
-                     perp1 = perp0.getCrossed( perp2 ).getNormalized();
-                     Off.x        = perp1.x * radius*age[j];
-                     Off.y       = perp1.y * radius*age[j];
-                     Off.z        = perp1.z * radius*age[j];
-                     
-                     strip[(index2)]=loc[index]-Off;
-                     
-                     strip[(index2+1)]=loc[index]+Off;
-                 }
-             }
-             loc[j*LOC_LENGTH] = pos[j];
-             pos[j]+=vec[j];
-             age[j]-=0.02;
-         }
-         else
-         {
-             for (int i=0; i<LOC_LENGTH; i++)
-             {
-                 int index = i+(j*LOC_LENGTH);
-                 loc[index].set(pos[j]);
-                 int index2 = (i*2)+(j*LENGTH);
-                 strip[(index2)]=loc[index];
-                 
-                 strip[(index2+1)]=loc[index];
-             }
-         }
+        {
+            ofVec3f _vec(ofSignedNoise(t, pos[j].y/div, pos[j].z/div),
+                         ofSignedNoise(pos[j].x/div, t, pos[j].z/div),
+                         0);
+            _vec *=  ofGetLastFrameTime()*50;
+            vec[j]+=_vec;
+            vec[j]+=acc[j];
+            vec[j]*=0.9;
+            ofVec3f Off;
+            float radius = 10;
+            for (int i=LOC_LENGTH-1; i>=1; i--)
+            {
+                int index = i+(j*LOC_LENGTH);
+                loc[index].set(loc[index-1]);
+            }
+            for (int i=0; i<LOC_LENGTH; i++)
+            {
+                int index = i+(j*LOC_LENGTH);
+                int index2 = (i*2)+(j*LENGTH);
+                
+                
+                radius = sinf(PI*float(i*1.f/LOC_LENGTH))*15;
+                {
+                    ofVec3f perp0 = loc[index] - loc[index+1];
+                    ofVec3f perp1 = perp0.getCrossed( ofVec3f( 0, 1, 0 ) ).getNormalized();
+                    ofVec3f perp2 = perp0.getCrossed( perp1 ).getNormalized();
+                    perp1 = perp0.getCrossed( perp2 ).getNormalized();
+                    Off.x        = perp1.x * radius*age[j];
+                    Off.y       = perp1.y * radius*age[j];
+                    Off.z        = perp1.z * radius*age[j];
+                    
+                    strip[(index2)]=loc[index]-Off;
+                    
+                    strip[(index2+1)]=loc[index]+Off;
+                }
+            }
+            loc[j*LOC_LENGTH] = pos[j];
+            pos[j]+=vec[j];
+            age[j]-=0.02;
+        }
+        else
+        {
+            for (int i=0; i<LOC_LENGTH; i++)
+            {
+                int index = i+(j*LOC_LENGTH);
+                loc[index].set(pos[j]);
+                int index2 = (i*2)+(j*LENGTH);
+                strip[(index2)]=loc[index];
+                
+                strip[(index2+1)]=loc[index];
+            }
+        }
         
         
     }
@@ -237,35 +239,35 @@ void testApp::update(){
         {
             fireStrip(point[i].x,point[i].y,pMouse[i].x,pMouse[i].y);
             canFire[i] = false;
-
+            
         }
     }
 }
 
 //--------------------------------------------------------------
 void testApp::draw(){
-//    ofSetColor( ofColor::white );
-	ofDrawBitmapString( "Double tap to align the cube", ofPoint( 10, 20 ) );
+    //    ofSetColor( ofColor::white );
+//	ofDrawBitmapString( "Double tap to align the cube", ofPoint( 10, 20 ) );
 	
 	camera.begin();
 	
-//	ofPushView();
+    //	ofPushView();
     ofPushMatrix();
 	{
 		ofRotateX( ofRadToDeg( pitch ) );
 		ofRotateY( -ofRadToDeg( roll ) );
 		ofRotateZ( -ofRadToDeg( yaw ) );
 		
-//		ofDrawAxis( 4 );
+        //		ofDrawAxis( 4 );
 		
 		ofNoFill();
 		ofSetHexColor( 0x00A6FF );
         glPointSize(3);
-//        sphereMesh.draw();
+        //        sphereMesh.draw();
         sphereMesh.drawWireframe();
         sphereMesh.drawVertices();
-//        ofSphere(0, 0, 0, 12);
-//		ofBox( 0, 0, 12 );
+        //        ofSphere(0, 0, 0, 12);
+        //		ofBox( 0, 0, 12 );
 	}
 	ofPopMatrix();
     
@@ -294,8 +296,8 @@ void testApp::draw(){
 void testApp::exit(){
     delete gui1;
 	delete gui2;
-//    delete gui3;
-//    delete gui4;
+    //    delete gui3;
+    //    delete gui4;
 }
 
 //--------------------------------------------------------------
@@ -304,8 +306,8 @@ void testApp::touchDown(ofTouchEventArgs & touch){
 }
 void testApp::fireStrip(float x, float y,float px , float py)
 {
-//    int ran = ofRandom(1,3);
-//    for(int j = 0 ; j < ran ; j++)
+    //    int ran = ofRandom(1,3);
+    //    for(int j = 0 ; j < ran ; j++)
     {
         count++;
         
@@ -328,7 +330,7 @@ void testApp::fireStrip(float x, float y,float px , float py)
             
             
         }
-
+        
         
         
     }
@@ -339,21 +341,21 @@ void testApp::touchMoved(ofTouchEventArgs & touch){
     {
         point[touch.id].set(touch.x, touch.y);
         canFire[touch.id] = true;
-
-    
-    ofxOscMessage m;
-    m.setAddress( "/mouse" );
-    m.addFloatArg( touch.x/ofGetWidth()*1.0f );
-    m.addFloatArg( touch.y/ofGetHeight()*1.0f );
-    m.addFloatArg( touch.x-pMouse[touch.id].x );
-    m.addFloatArg( touch.y-pMouse[touch.id].y );
-
-    sender.sendMessage( m );
-                    pMouse[touch.id] = point[touch.id];
+        
+        
+        ofxOscMessage m;
+        m.setAddress( "/mouse" );
+        m.addFloatArg( touch.x/ofGetWidth()*1.0f );
+        m.addFloatArg( touch.y/ofGetHeight()*1.0f );
+        m.addFloatArg( touch.x-pMouse[touch.id].x );
+        m.addFloatArg( touch.y-pMouse[touch.id].y );
+        
+        sender.sendMessage( m );
+        pMouse[touch.id] = point[touch.id];
     }
     
     
-
+    
 }
 
 //--------------------------------------------------------------
@@ -430,7 +432,7 @@ void testApp::guiEvent(ofxUIEventArgs &e)
 	string name = e.widget->getName();
 	int kind = e.widget->getKind();
 	cout << "got event from: " << name << endl;
-//    if(kind == OFX_UI_WIDGET_TOGGLE)
+    //    if(kind == OFX_UI_WIDGET_TOGGLE)
     {
         ofxOscBundle bundle;
         if(name =="POINT")
@@ -440,7 +442,7 @@ void testApp::guiEvent(ofxUIEventArgs &e)
             msg.setAddress("/mode");
             msg.addIntArg(0);
             bundle.addMessage(msg);
-                        gui2->setVisible(false);
+            gui2->setVisible(false);
             
         }else if(name =="DISPLACEMENT")
         {
@@ -448,7 +450,7 @@ void testApp::guiEvent(ofxUIEventArgs &e)
             msg.setAddress("/mode");
             msg.addIntArg(1);
             bundle.addMessage(msg);
-            gui2->setVisible(false);            
+            gui2->setVisible(false);
         }else if(name == "TRIANGLE")
         {
             gui2->setVisible(false);
@@ -470,15 +472,15 @@ void testApp::guiEvent(ofxUIEventArgs &e)
             msg.setAddress("/slitscan");
             msg.addStringArg(name);
             bundle.addMessage(msg);
-//            "0: most recent");
-//            gradientModeRadioOption.push_back("1: left-right");
-//            gradientModeRadioOption.push_back("2: right-left");
-//            gradientModeRadioOption.push_back("3: top-bottom");
-//            gradientModeRadioOption.push_back("4: bottom-top"
+            //            "0: most recent");
+            //            gradientModeRadioOption.push_back("1: left-right");
+            //            gradientModeRadioOption.push_back("2: right-left");
+            //            gradientModeRadioOption.push_back("3: top-bottom");
+            //            gradientModeRadioOption.push_back("4: bottom-top"
         }
         sender.sendBundle(bundle);
     }
-
+    
 }
 void testApp::setGUI1()
 {
@@ -486,13 +488,17 @@ void testApp::setGUI1()
 	float xInit = OFX_UI_GLOBAL_WIDGET_SPACING;
     float length = ofGetWidth();
     float height = ofGetHeight()/4.0f;
-
+    float ih = height/4.0f;
+    
 	gui1 = new ofxUICanvas(0, ofGetHeight()-height, length+xInit, height);
-gui1->addLabel("PANEL1");
-    gui1->addLabelButton("DISPLACEMENT", false, length-xInit);
-    gui1->addLabelButton("POINT", false, length-xInit);
-    gui1->addLabelButton("TRIANGLE", false, length-xInit);
-//    gui1->addLabelButton("SLITSCAN", false, length-xInit);
+
+    gui1->addWidgetDown(new ofxUIMultiImageButton(length-xInit,ih, false, "GUI/images/1.png","DISPLACEMENT"));
+    gui1->addWidgetDown(new ofxUIMultiImageButton(length-xInit,ih, false, "GUI/images/2.png","POINT"));
+    gui1->addWidgetDown(new ofxUIMultiImageButton(length-xInit,ih, false, "GUI/images/3.png","TRIANGLE"));
+//    gui1->addImageButton("DISPLACEMENT", false, length-xInit,ih);
+//    gui1->addImageButton("POINT", false, length-xInit,ih);
+//    gui1->addImageButton("TRIANGLE", false, length-xInit,ih);
+    //    gui1->addLabelButton("SLITSCAN", false, length-xInit);
     ofAddListener(gui1->newGUIEvent,this,&testApp::guiEvent);
 }
 void testApp::setGUI2()
@@ -515,7 +521,7 @@ void testApp::setGUI2()
     gui2->addLabelButton(gradientModeRadioOption[2], false, length-xInit);
     gui2->addLabelButton(gradientModeRadioOption[3], false, length-xInit);
     gui2->addLabelButton(gradientModeRadioOption[4], false, length-xInit);
-
+    
     ofAddListener(gui2->newGUIEvent,this,&testApp::guiEvent);
     
 }
@@ -525,7 +531,7 @@ void testApp::setGUI2()
 //	float xInit = OFX_UI_GLOBAL_WIDGET_SPACING;
 //    float length = ofGetWidth()/4.0f;
 //    float height = ofGetHeight()/4.0f;
-//    
+//
 //	gui3 = new ofxUICanvas(length*2+xInit, ofGetHeight()-height, length+xInit, height);
 //    gui3->addLabel("PANEL3");
 //    ofAddListener(gui3->newGUIEvent,this,&testApp::guiEvent);
