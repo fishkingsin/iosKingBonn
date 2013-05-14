@@ -76,7 +76,9 @@ public:
     bool canFire[NUM_TOUCH];
     ofVec3f pMouse[NUM_TOUCH];
     
-    ofVboMesh sphereMesh;
+    ofMesh sphereMesh;
+    ofLight light;
+    
 
     
 
