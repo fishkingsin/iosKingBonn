@@ -203,7 +203,8 @@ void testApp::setup(){
 //    float latitudeBands = 30;
 //    float longitudeBands = 30;
 //    float radius = 12;
-    Sphere b(9,8);
+    info.loadImage("GUI/images/InfoLabel.png");
+    Sphere b(9,6);
     sphereMesh.addVertices(b.getVertices());
     sphereMesh.addColors(b.getColors());
     sphereMesh.addNormals(b.getNormals());
@@ -299,22 +300,22 @@ void testApp::setup(){
         point[i].set(0,0);
     }
     
-    setGUI1();
-	setGUI2();
+//    setGUI1();
+//	setGUI2();
     //    setGUI3();
     //    setGUI4();
     //
-    gui1->setDrawPadding(true);
-    gui2->setDrawPadding(true);
+//    gui1->setDrawPadding(true);
+//    gui2->setDrawPadding(true);
     //    gui3->setDrawPadding(true);
     //    gui4->setDrawPadding(true);
     
-    gui1->setDrawBack(true);
-    gui2->setDrawBack(true);
+//    gui1->setDrawBack(true);
+//    gui2->setDrawBack(true);
     //    gui3->setDrawBack(false);
     //    gui4->setDrawBack(false);
-    gui1->setVisible(true);
-    gui2->setVisible(false);
+//    gui1->setVisible(true);
+//    gui2->setVisible(false);
     //    gui3->setVisible(true);
     //    gui4->setVisible(true);
 }
@@ -322,46 +323,46 @@ void testApp::setup(){
 //--------------------------------------------------------------
 void testApp::update(){
     // check for waiting messages
-    while(receiver.hasWaitingMessages()){
-        // get the next message
-        ofxOscMessage m;
-        receiver.getNextMessage(&m);
-        
-        // check for mouse moved message
-        if(m.getAddress() == "/mode"){
-            int _mode = m.getArgAsInt32(0);
-            switch(_mode)   
-            {
-                case 0:
-                    //                    mode = POINT;
-                    gui1->setVisible(true);
-                    gui2->setVisible(false);
-                    break;
-                case 1:
-                    //                    mode = SLITSCAN;
-                    gui1->setVisible(false);
-                    gui2->setVisible(true);
-                    break;
-                case 2:
-                    
-                    gui1->setVisible(true);
-                    gui2->setVisible(false);
-                    //                    mode = TRIANGLE;
-                    
-                    break;
-                case 3:
-                    //                    mode = DISPLACEMENT;
-                    gui1->setVisible(true);
-                    gui2->setVisible(false);
-                    break;
-                default:
-                    //                    mode = POINT;
-                    break;
-                    
-            }
-            
-        }
-    }
+//    while(receiver.hasWaitingMessages()){
+//        // get the next message
+//        ofxOscMessage m;
+//        receiver.getNextMessage(&m);
+//        
+//        // check for mouse moved message
+//        if(m.getAddress() == "/mode"){
+//            int _mode = m.getArgAsInt32(0);
+//            switch(_mode)   
+//            {
+//                case 0:
+//                    //                    mode = POINT;
+//                    gui1->setVisible(true);
+//                    gui2->setVisible(false);
+//                    break;
+//                case 1:
+//                    //                    mode = SLITSCAN;
+//                    gui1->setVisible(false);
+//                    gui2->setVisible(true);
+//                    break;
+//                case 2:
+//                    
+//                    gui1->setVisible(true);
+//                    gui2->setVisible(false);
+//                    //                    mode = TRIANGLE;
+//                    
+//                    break;
+//                case 3:
+//                    //                    mode = DISPLACEMENT;
+//                    gui1->setVisible(true);
+//                    gui2->setVisible(false);
+//                    break;
+//                default:
+//                    //                    mode = POINT;
+//                    break;
+//                    
+//            }
+//            
+//        }
+//    }
     //    if( ofGetFrameNum() % 120 == 0 ){
     ofxOscMessage m;
     m.setAddress( "/orbit" );
@@ -447,7 +448,11 @@ void testApp::update(){
 void testApp::draw(){
     //    ofSetColor( ofColor::white );
 //	ofDrawBitmapString( "Double tap to align the cube", ofPoint( 10, 20 ) );
-    
+    ofSetColor(255);
+    ofPushMatrix();
+    ofScale(0.5, 0.5);
+    info.draw(0, 0);
+    ofPopMatrix();
 	light.enable();
     glEnable(GL_DEPTH_TEST);
 	camera.begin();
@@ -502,8 +507,8 @@ void testApp::draw(){
 
 //--------------------------------------------------------------
 void testApp::exit(){
-    delete gui1;
-	delete gui2;
+//    delete gui1;
+//	delete gui2;
     //    delete gui3;
     //    delete gui4;
 }
@@ -635,77 +640,78 @@ void testApp::getDeviceGLRotationMatrix() {
 	
 }
 
-void testApp::guiEvent(ofxUIEventArgs &e)
-{
-	string name = e.widget->getName();
-	int kind = e.widget->getKind();
-	cout << "got event from: " << name << endl;
-    //    if(kind == OFX_UI_WIDGET_TOGGLE)
-    {
-        ofxOscBundle bundle;
-        if(name =="POINT")
-        {
-            ofxOscMessage msg;
-            
-            msg.setAddress("/mode");
-            msg.addIntArg(0);
-            bundle.addMessage(msg);
-            gui2->setVisible(false);
-            
-        }else if(name =="DISPLACEMENT")
-        {
-            ofxOscMessage msg;
-            msg.setAddress("/mode");
-            msg.addIntArg(1);
-            bundle.addMessage(msg);
-            gui2->setVisible(false);
-        }else if(name == "TRIANGLE")
-        {
-            gui2->setVisible(false);
-            ofxOscMessage msg;
-            msg.setAddress("/mode");
-            msg.addIntArg(3);
-            bundle.addMessage(msg);
-        }else if(name == "SLITSCAN")
-        {
-            gui2->setVisible(true);
-            ofxOscMessage msg;
-            msg.setAddress("/mode");
-            msg.addIntArg(2);
-            bundle.addMessage(msg);
-        }
-        else
-        {
-            ofxOscMessage msg;
-            msg.setAddress("/slitscan");
-            msg.addStringArg(name);
-            bundle.addMessage(msg);
-            //            "0: most recent");
-            //            gradientModeRadioOption.push_back("1: left-right");
-            //            gradientModeRadioOption.push_back("2: right-left");
-            //            gradientModeRadioOption.push_back("3: top-bottom");
-            //            gradientModeRadioOption.push_back("4: bottom-top"
-        }
-        sender.sendBundle(bundle);
-    }
-    
-}
-void testApp::setGUI1()
+//void testApp::guiEvent(ofxUIEventArgs &e)
+//{
+//	string name = e.widget->getName();
+//	int kind = e.widget->getKind();
+//	cout << "got event from: " << name << endl;
+//    //    if(kind == OFX_UI_WIDGET_TOGGLE)
+//    {
+//        ofxOscBundle bundle;
+//        if(name =="POINT")
+//        {
+//            ofxOscMessage msg;
+//            
+//            msg.setAddress("/mode");
+//            msg.addIntArg(0);
+//            bundle.addMessage(msg);
+//            gui2->setVisible(false);
+//            
+//        }else if(name =="DISPLACEMENT")
+//        {
+//            ofxOscMessage msg;
+//            msg.setAddress("/mode");
+//            msg.addIntArg(1);
+//            bundle.addMessage(msg);
+//            gui2->setVisible(false);
+//        }else if(name == "TRIANGLE")
+//        {
+//            gui2->setVisible(false);
+//            ofxOscMessage msg;
+//            msg.setAddress("/mode");
+//            msg.addIntArg(3);
+//            bundle.addMessage(msg);
+//        }else if(name == "SLITSCAN")
+//        {
+//            gui2->setVisible(true);
+//            ofxOscMessage msg;
+//            msg.setAddress("/mode");
+//            msg.addIntArg(2);
+//            bundle.addMessage(msg);
+//        }
+//        else
+//        {
+//            ofxOscMessage msg;
+//            msg.setAddress("/slitscan");
+//            msg.addStringArg(name);
+//            bundle.addMessage(msg);
+//            //            "0: most recent");
+//            //            gradientModeRadioOption.push_back("1: left-right");
+//            //            gradientModeRadioOption.push_back("2: right-left");
+//            //            gradientModeRadioOption.push_back("3: top-bottom");
+//            //            gradientModeRadioOption.push_back("4: bottom-top"
+//        }
+//        sender.sendBundle(bundle);
+//    }
+//    
+//}
+/*void testApp::setGUI1()
 {
     float dim = 16;
 	float xInit = OFX_UI_GLOBAL_WIDGET_SPACING;
     float length = ofGetWidth();
     float height = ofGetHeight()/4.0f;
-    float ih = height/4.0f;
+    float ih = height/5.0f;
     
 	gui1 = new ofxUICanvas(0, ofGetHeight()-height, length+xInit, height);
+    gui1->addWidgetDown( new ofxUIImage((length-xInit)*0.5 , (ih-xInit)*0.5,new ofImage("GUI/images/InfoLabel.png"), "INFO",0));
+    gui1->addWidgetDown(new ofxUIMultiImageButton(length-xInit,ih-xInit, false, "GUI/images/1.png","DISPLACEMENT"));
+    gui1->addWidgetDown(new ofxUIMultiImageButton(length-xInit,ih-xInit, false, "GUI/images/2.png","POINT"));
+    gui1->addWidgetDown(new ofxUIMultiImageButton(length-xInit,ih-xInit, false, "GUI/images/3.png","TRIANGLE"));
 
-    gui1->addWidgetDown(new ofxUIMultiImageButton(length-xInit,ih, false, "GUI/images/1.png","DISPLACEMENT"));
-    gui1->addWidgetDown(new ofxUIMultiImageButton(length-xInit,ih, false, "GUI/images/2.png","POINT"));
-    gui1->addWidgetDown(new ofxUIMultiImageButton(length-xInit,ih, false, "GUI/images/3.png","TRIANGLE"));
-//    gui1->addImageButton("DISPLACEMENT", false, length-xInit,ih);
-//    gui1->addImageButton("POINT", false, length-xInit,ih);
-//    gui1->addImageButton("TRIANGLE", false, length-xInit,ih);
+//    gui1->addButton("DISPLACEMENT", false, length-xInit,ih);
+//    gui1->addButton("POINT", false, length-xInit,ih);
+//    gui1->addButton("TRIANGLE", false, length-xInit,ih);
     //    gui1->addLabelButton("SLITSCAN", false, length-xInit);
     ofAddListener(gui1->newGUIEvent,this,&testApp::guiEvent);
 }
@@ -715,24 +721,31 @@ void testApp::setGUI2()
 	float xInit = OFX_UI_GLOBAL_WIDGET_SPACING;
     float length = ofGetWidth();
     float height = ofGetHeight()/4.0f;
-    
+    float ih = height/5.0;
 	gui2 = new ofxUICanvas(0, ofGetHeight()-height, length+xInit, height);
-    gui2->addLabel("PANEL2");
-    vector<string>gradientModeRadioOption;
-    gradientModeRadioOption.push_back("0: most recent");
-    gradientModeRadioOption.push_back("1: left-right");
-    gradientModeRadioOption.push_back("2: right-left");
-    gradientModeRadioOption.push_back("3: top-bottom");
-    gradientModeRadioOption.push_back("4: bottom-top");
-    gui2->addLabelButton(gradientModeRadioOption[0], false, length-xInit);
-    gui2->addLabelButton(gradientModeRadioOption[1], false, length-xInit);
-    gui2->addLabelButton(gradientModeRadioOption[2], false, length-xInit);
-    gui2->addLabelButton(gradientModeRadioOption[3], false, length-xInit);
-    gui2->addLabelButton(gradientModeRadioOption[4], false, length-xInit);
+//    gui2->addLabel("PANEL2");
+    gui2->addWidgetDown( new ofxUIImage((length-xInit)*0.5 , (ih)*0.5,new ofImage("GUI/images/panel2.png"), "PANEL2" , 0));
+    gui2->addWidgetDown(new ofxUIMultiImageButton(length-xInit,ih-xInit, false, "GUI/images/4.png","EFFECT1"));
+    gui2->addWidgetDown(new ofxUIMultiImageButton(length-xInit,ih-xInit, false, "GUI/images/5.png","EFFECT2"));
+    gui2->addWidgetDown(new ofxUIMultiImageButton(length-xInit,ih-xInit, false, "GUI/images/6.png","EFFECT3"));
+    
+    
+//    vector<string>gradientModeRadioOption;
+//    gradientModeRadioOption.push_back("0: most recent");
+//    gradientModeRadioOption.push_back("1: left-right");
+//    gradientModeRadioOption.push_back("2: right-left");
+//    gradientModeRadioOption.push_back("3: top-bottom");
+//    gradientModeRadioOption.push_back("4: bottom-top");
+//
+//    gui2->addLabelButton(gradientModeRadioOption[0], false, length-xInit);
+//    gui2->addLabelButton(gradientModeRadioOption[1], false, length-xInit);
+//    gui2->addLabelButton(gradientModeRadioOption[2], false, length-xInit);
+//    gui2->addLabelButton(gradientModeRadioOption[3], false, length-xInit);
+//    gui2->addLabelButton(gradientModeRadioOption[4], false, length-xInit);
     
     ofAddListener(gui2->newGUIEvent,this,&testApp::guiEvent);
     
-}
+}*/
 //void testApp::setGUI3()
 //{
 //    float dim = 16;

@@ -50,15 +50,16 @@ public:
     void fireStrip(float x, float y,float px, float py);
 
 
-    	void guiEvent(ofxUIEventArgs &e);
-    void setGUI1();
-	void setGUI2();
+//    	void guiEvent(ofxUIEventArgs &e);
+//    void setGUI1();
+//	void setGUI2();
 //	void setGUI3();
 //	void setGUI4();
-    ofxUICanvas *gui1;
-    ofxUICanvas *gui2;
+//    ofxUICanvas *gui1;
+//    ofxUICanvas *gui2;
 //    ofxUICanvas *gui3;
 //    ofxUICanvas *gui4;
+    ofImage info;
     
     
     
